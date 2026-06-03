@@ -1,0 +1,1 @@
+ffmpeg -i $1.mp3 -ac 1 -acodec pcm_s16le $1.wav
