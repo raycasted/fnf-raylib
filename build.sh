@@ -33,6 +33,10 @@ mkdcdisc \
   -r 20260524 \
   -a hdfsyu \
   -n "Friday Night Funkin'" \
+  -c cdda-tracks/t1-stressfull.wav \
+  -c cdda-tracks/t2-titletrack.wav \
+  -c cdda-tracks/t3-blammedfull.wav \
+  -c cdda-tracks/t4-gameover.wav \
   -N \
   -D $ISO_DIR \
   -o $OUTPUT
