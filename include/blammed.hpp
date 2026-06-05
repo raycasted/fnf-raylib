@@ -5794,6 +5794,7 @@ void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerA
     gfSpeaker_TestSong = LoadTexture("/cd/shared/gfDanceTitle2.png");
     gfSpeaker_TestSong.width = 1816;
 	gfSpeaker_TestSong.height = 1332;
+    SetTextureFilter(gfSpeaker_TestSong, TEXTURE_FILTER_BILINEAR);
     pico_TestSong = LoadTexture("/cd/blammed/pico.png");
     pico_TestSong.width = 1026;
     pico_TestSong.height = 513;

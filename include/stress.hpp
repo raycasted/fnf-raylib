@@ -14956,6 +14956,7 @@ void Stress(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArr
     gfSpeaker_stress = LoadTexture("/cd/shared/gfDanceTitle2.png");
     gfSpeaker_stress.width = 1816;
 	gfSpeaker_stress.height = 1332;
+    SetTextureFilter(gfSpeaker_stress, TEXTURE_FILTER_BILINEAR);
     pico_stress = LoadTexture("/cd/blammed/pico.png");
     pico_stress.width = 1026;
     pico_stress.height = 513;
