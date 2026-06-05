@@ -99,22 +99,28 @@ Sound gameOverEnd;
 // must be a 2600 width
 // idle animation must be 5 frames long
 enum EnemyStates{
+	// idle is on another height level
+	// -- second row --
     idleEnemy = 0,
-    upEnemy = 260*5,
-    leftEnemy = 260*6,
-    rightEnemy = 260*7,
-    downEnemy = 260*8
+	// -- first row --
+    upEnemy = 0,
+    leftEnemy = 260,
+    rightEnemy = 260*2,
+    downEnemy = 260*3
 };
 enum PlayerStates{
+	// -- second row --
     idlePlayer = 0,
-    upPlayer = 225*5,
-    leftPlayer = 225*6,
-    rightPlayer = 225*7,
-    downPlayer = 225*8,
-	leftPlayerMissed = 225*9,
-	upPlayerMissed = 225*10,
-	rightPlayerMissed = 225*11,
-	downPlayerMissed = 225*12,
+	// -- first row --
+    upPlayer = 0,
+    leftPlayer = 225,
+    rightPlayer = 225*2,
+    downPlayer = 225*3,
+	// -- third row --
+	leftPlayerMissed = 0,
+	upPlayerMissed = 225,
+	rightPlayerMissed = 225*2,
+	downPlayerMissed = 225*3,
 };
 // INITIALIZE
 int main()
@@ -190,6 +196,7 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 	playerFramesCounter = 0;
 	if(CheckCollisionCircles({playerArrows.back().pos.x + 50, playerArrows.back().pos.y+48}, playerArrows.back().radius, {x,80}, targetRadius) && playerArrows.back().side == playerSide && !playerArrows.empty()){
 		if(playerArrows.back().pos.y < 100){
+			playerRec.y = 0;
 			playerRec.x = hitState;
 			misses--;
 			if(isPaused){
@@ -202,6 +209,7 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 			}
 			
 		}else{
+			playerRec.y = 0;
 			playerRec.x = hitState;
 			misses--;
 			if(isPaused){
@@ -214,6 +222,7 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 			}
 		}
 	}else{
+		playerRec.y = 450;
 		score -= 10;
 		misses++;
 		SetMusicVolume(player, 0);
@@ -693,6 +702,7 @@ void UpdateDrawFrame(){
 			rightColor = RED;
 		}
 		if(!computerArrows.empty() && computerArrows.back().pos.y <= 80 && computerArrows.back().side == computerSide){
+			enemyRec.y = 0;
 			switch((int)computerArrows.back().pos.x){
 				case 800/2:
 					leftColorCPU = PURPLE;
@@ -814,6 +824,7 @@ void UpdateDrawFrame(){
 		EndDrawing();
 		if(!playerArrows.empty() && playerArrows.back().pos.y < -16){
 			if(playerArrows.back().side == playerSide){
+				playerRec.y = 450;
 				score -= 10;
 				SetMusicVolume(player, 0);
 				isPaused = true;
@@ -888,6 +899,7 @@ void UpdateDrawFrame(){
 			framesCounter = 0;
 			currentFrame++;
 			if(currentFrame < 4){
+				enemyRec.y = 260;
 				enemyRec.x = (float)currentFrame*260;
 			}
 			if(currentFrame > 20){
@@ -897,6 +909,7 @@ void UpdateDrawFrame(){
 		if(playerFramesCounter >= 60 / framesSpeed){
 			playerFramesCounter = 0;
 			if(currentFrame < 4){
+				playerRec.y = 225;
 				playerRec.x = (float)currentFrame*225;
 			}
 		}
