@@ -37,8 +37,39 @@ class Arrow
                     if(side == playerSide){
                         //DrawRectangle(pos.x + 24, pos.y + 24, 64, trailSize, {color.r, color.g, color.b, 200});
                         DrawTextureRec(holdAssets, {trailRec.x, trailRec.y, trailRec.width, (float)trailSize}, {pos.x + 12, pos.y + 12}, WHITE);
+                        // DISGUSTING hack so the game doesn't shit on the dreamcast's RAM limits
+                        // using trailEnd is apparently too heavy for the dreamcast?
+                        switch((int)pos.x){
+                            case 800/2:
+                                DrawTextureRec(holdAssets, {32, 0, 32, 24}, {pos.x + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 900/2:
+                                DrawTextureRec(holdAssets, {64+32, 0, 32, 24}, {pos.x + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 1000/2:
+                                DrawTextureRec(holdAssets, {128+32, 0, 32, 24}, {pos.x + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 1100/2:
+                                DrawTextureRec(holdAssets, {192+32, 0, 32, 24}, {pos.x + 12, pos.y + trailSize}, WHITE);
+                                break;
+                        }
                     }else{
                         DrawTextureRec(holdAssets, {trailRec.x, trailRec.y, trailRec.width, (float)trailSize}, {pos.x - 730/2 + 12, pos.y + 12}, WHITE);
+                        switch((int)pos.x){
+                            case 800/2:
+                                DrawTextureRec(holdAssets, {32, 0, 32, 24}, {pos.x - 730/2 + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 900/2:
+                                DrawTextureRec(holdAssets, {64+32, 0, 32, 24}, {pos.x - 730/2 + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 1000/2:
+                                DrawTextureRec(holdAssets, {128+32, 0, 32, 24}, {pos.x - 730/2 + 12, pos.y + trailSize}, WHITE);
+                                break;
+                            case 1100/2:
+                                DrawTextureRec(holdAssets, {192+32, 0, 32, 24}, {pos.x - 730/2 + 12, pos.y + trailSize}, WHITE);
+                                break;
+                        }
+                       
                     }
                 }
                 if(side == playerSide){

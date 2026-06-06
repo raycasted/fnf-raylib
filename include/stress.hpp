@@ -9,7 +9,6 @@ Texture2D behindTrain_stress;
 Texture2D city_stress;
 Texture2D sky_stress;
 Texture2D street_stress;
-Texture2D train_stress;
 Texture2D win_stress;
 Texture2D gfSpeaker_stress;
 Texture2D pico_stress;
@@ -14947,9 +14946,6 @@ void Stress(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArr
     street_stress = LoadTexture("/cd/blammed/street.png");
     street_stress.width = 1108;
     street_stress.height = 428;
-    train_stress = LoadTexture("/cd/blammed/train.png");
-    train_stress.width = 2048;
-    train_stress.height = 256;
     win_stress = LoadTexture("/cd/blammed/win.png");
     win_stress.width = 1059;
     win_stress.height = 207;
@@ -15000,32 +14996,22 @@ void StressDraw(Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera){
 			currentFrame_stress = 1;
 		}
 	}
-    Color win_stressTint = YELLOW;
-    if(trainSpeed_stress >= 2000 && trainSpeed_stress < 5000){
-        win_stressTint = BLUE;
-    }
-    if(trainSpeed_stress >= 9999){
-        trainSpeed_stress = -1280;
-    }
-     ClearBackground(DARKPURPLE); // dark maroon #3c0008
+    ClearBackground(DARKPURPLE); // dark maroon #3c0008
     DrawTextureEx(sky_stress, {-580/2, -10/2}, 0.0f, 1.4f, WHITE);
 	DrawTextureEx(city_stress, {-90/2, 100/2}, 0.0f, 0.7f, WHITE);
-    DrawTextureEx(win_stress, {-40/2, 190/2}, 0.0f, 0.7f, win_stressTint);
+    DrawTextureEx(win_stress, {-40/2, 190/2}, 0.0f, 0.7f, YELLOW);
     DrawTextureEx(behindTrain_stress, {-90/2, 150/2}, 0.0f, 0.7f, WHITE);
-	DrawTextureEx(train_stress, {(float)trainSpeed_stress, 270/2}, 0.0f, 0.7f, WHITE);
     DrawTextureEx(street_stress, {-90/2, 150/2}, 0.0f, 0.7f, WHITE);
     //DrawTextureEx(gfSpeaker_TestSong, {1280/2-256, 150}, 0.0f, 0.7f, WHITE);
     DrawTextureRec(gfSpeaker_stress, gfSpeakerRec_stress, {(1280/2-380)/2, 0}, WHITE);
-    DrawTextureRec(pico_stress, *enemyRec, {(1280/2-700)/2, 240/2}, WHITE);
+    DrawTextureRec(pico_stress, *enemyRec, {0, 240/2}, WHITE);
     DrawTextureRec(boyfriend_stress, *playerRec, {(1280/2+200)/2, 320/2}, WHITE);
-    trainSpeed_stress += 5000 * GetFrameTime();
 }
 void StressCleanup(){
     UnloadTexture(behindTrain_stress);
     UnloadTexture(city_stress);
     UnloadTexture(sky_stress);
     UnloadTexture(street_stress);
-    UnloadTexture(train_stress);
     UnloadTexture(win_stress);
     UnloadTexture(gfSpeaker_stress);
     UnloadTexture(pico_stress);

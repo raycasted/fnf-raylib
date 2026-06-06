@@ -30,8 +30,6 @@ int currentFrame4 = 0; // when to exit out of promptMenu
 int framesSpeed = 15;
 double loadStart;
 double loadDuration;
-float songStart;
-float songEnd;
 Color leftColor = WHITE;
 Color downColor = WHITE;
 Color upColor = WHITE;
@@ -126,12 +124,6 @@ enum PlayerStates{
 int main()
 {
 	void UpdateDrawFrame();
-	// Tell the window to use vsync (not anymore) and work on high DPI displays
-	#if defined(PLATFORM_WEB)
-		SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-	#else
-		SetConfigFlags(FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE);
-	#endif
 	// Create the window and OpenGL context
 	// look into using render textures for downscaling/upscaling the game to different resolutions
 	InitWindow(640, 480, "Vibin'");
@@ -154,7 +146,6 @@ int main()
 	storageStress = LoadStorageValue(STORAGE_POSITION_STRESS);
 	//SeekMusicStream(titleTrack, 50);
 	Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
-    songStart = GetTime();
 	PlayMusicStream(titleTrack);
 	//PlayMusicStream(titleTrack);
 	#if defined(PLATFORM_WEB)
@@ -283,7 +274,6 @@ void UpdateDrawFrame(){
 				songCleanup(songName);
 				songLoad(songName, &playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				loadDuration = GetTime() - loadStart;
-				songStart = GetTime();
 				SeekMusicStream(instrumental, loadDuration);
 				SeekMusicStream(player, loadDuration);
 				PlayMusicStream(instrumental);
@@ -409,7 +399,6 @@ void UpdateDrawFrame(){
 				TestSong(&playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				Load_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend, &gameOverRec);
 				loadDuration = GetTime() - loadStart;
-				songStart = GetTime();
 				SeekMusicStream(instrumental, loadDuration);
 				SeekMusicStream(player, loadDuration);
 				PlayMusicStream(instrumental);
@@ -424,7 +413,6 @@ void UpdateDrawFrame(){
 				Stress(&playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				Load_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend, &gameOverRec);
 				loadDuration = GetTime() - loadStart;
-				songStart = GetTime();
 				SeekMusicStream(instrumental, loadDuration);
 				SeekMusicStream(player, loadDuration);
 				PlayMusicStream(instrumental);
@@ -460,14 +448,14 @@ void UpdateDrawFrame(){
 		}
 		// title
 		BeginDrawing();
-		if(songEnd >= 1.5 && songEnd < 4.5){
+		if(GetMusicTimePlayed(titleTrack) >= 1.5 && GetMusicTimePlayed(titleTrack) < 4.5){
 			DrawTextEx(fnfFont, "ITS ALL IN", {(1280/2 - 100)/2, (720/2 - 30)/2}, 48/2, 1.0f, WHITE);
 		}
 
-		if(songEnd >= 2.5 && songEnd < 4.5){
+		if(GetMusicTimePlayed(titleTrack) >= 2.5 && GetMusicTimePlayed(titleTrack) < 4.5){
 			DrawTextEx(fnfFont, "RAYLIB", {(1280/2 - 100)/2, (720/2 + 18)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(songEnd >= 4.5 && songEnd < 6.5){
+		if(GetMusicTimePlayed(titleTrack) >= 4.5 && GetMusicTimePlayed(titleTrack) < 6.5){
 			ClearBackground(BLACK);
 		}/*
 		if(songEnd >= 5 && songEnd < 6){
@@ -484,25 +472,22 @@ void UpdateDrawFrame(){
 		if(songEnd >= 6.5 && songEnd < 8.5){
 			ClearBackground(BLACK);
 		}*/
-		if(songEnd >= 7){
+		if(GetMusicTimePlayed(titleTrack) >= 7){
 			DrawTextEx(fnfFont, "FRIDAY", {(1280/2 - 100)/2, (720/2 - 30)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(songEnd >= 7.5){
+		if(GetMusicTimePlayed(titleTrack) >= 7.5){
 			DrawTextEx(fnfFont, "NIGHT", {(1280/2 - 100)/2, (720/2 + 18)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(songEnd >= 8.5){
+		if(GetMusicTimePlayed(titleTrack) >= 8.5){
 			DrawTextEx(fnfFont, "FUNKIN", {(1280/2 - 100)/2, (720/2 + 66)/2}, 48/2, 1.0f, WHITE);
+		}
+		if(GetMusicTimePlayed(titleTrack) >= 9.5){
+			sceneIndex = promptMenu;
 		}
 		/*if(songEnd >= 10.6){
 			ClearBackground(WHITE);
 			DrawTexture(metalPipe, 0, 0, WHITE);
 		}*/
-		songEnd = GetTime() - songStart;
-		if(songEnd >= 9.5){
-			songStart = 0;
-			songEnd = 0;
-			sceneIndex = promptMenu;
-		}
 		EndDrawing();
 		
 		break;
@@ -921,7 +906,6 @@ void UpdateDrawFrame(){
 		if(!computerArrows.empty()){
 			computerArrows.back().speed = 1000;
 		}
-		songEnd = GetTime() - songStart;
 		break;
 	}
 }

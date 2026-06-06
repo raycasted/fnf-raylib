@@ -5806,7 +5806,7 @@ void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerA
     *instrumental = LoadMusicStream("/cd/blammed/blammed.wav");
     *player = LoadMusicStream("/cd/blammed/blammed-player.wav");
     gfSpeakerRec_TestSong = { 0.0f, 0.0f, (float)gfSpeaker_TestSong.width/5, (float)gfSpeaker_TestSong.height/4 };
-    *enemyRec = {0.0f, 256.0f, (float)pico_TestSong.width/4, (float)pico_TestSong.height/2};
+    *enemyRec = {0.0f, 260.0f, (float)pico_TestSong.width/4, (float)pico_TestSong.height/2};
     *playerRec = {0.0f, 225.0f, (float)boyfriend_TestSong.width/4, (float)boyfriend_TestSong.height/3};
     camera->target = {640/2,360/2};
     camera->offset = {640/2, 360/2};
@@ -5854,7 +5854,7 @@ void TestSongDraw(Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera){
     DrawTextureEx(street_TestSong, {-90/2, 150/2}, 0.0f, 0.7f, WHITE);
     //DrawTextureEx(gfSpeaker_TestSong, {1280/2-256, 150}, 0.0f, 0.7f, WHITE);
     DrawTextureRec(gfSpeaker_TestSong, gfSpeakerRec_TestSong, {(1280/2-380)/2, 0}, WHITE);
-    DrawTextureRec(pico_TestSong, *enemyRec, {(1280/2-700)/2, 240/2}, WHITE);
+    DrawTextureRec(pico_TestSong, *enemyRec, {0, 240/2}, WHITE);
     DrawTextureRec(boyfriend_TestSong, *playerRec, {(1280/2+200)/2, 320/2}, WHITE);
     trainSpeed_TestSong += 5000 * GetFrameTime();
 }
