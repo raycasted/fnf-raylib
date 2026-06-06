@@ -5798,9 +5798,11 @@ void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerA
     pico_TestSong = LoadTexture("/cd/blammed/pico.png");
     pico_TestSong.width = 1026;
     pico_TestSong.height = 513;
+    SetTextureFilter(pico_TestSong, TEXTURE_FILTER_BILINEAR);
     boyfriend_TestSong = LoadTexture("/cd/shared/boyfriend.png");
     boyfriend_TestSong.width = 900;
     boyfriend_TestSong.height = 675;
+    SetTextureFilter(boyfriend_TestSong, TEXTURE_FILTER_BILINEAR);
     currentFrame_TestSong = 0;
     frameCounter_TestSong = 0;
     *instrumental = LoadMusicStream("/cd/blammed/blammed.wav");

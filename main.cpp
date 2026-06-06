@@ -832,13 +832,7 @@ void UpdateDrawFrame(){
 			}
 			playerArrows.pop_back();
 		}
-		// stops one second early
-		// so it doesnt repeat
-		if(GetMusicTimePlayed(instrumental) >= GetMusicTimeLength(instrumental)){
-			StopMusicStream(instrumental);
-			StopMusicStream(player);
-		}
-		if(GetMusicTimePlayed(instrumental) + 1.0f > GetMusicTimeLength(instrumental)){
+		if((GetMusicTimePlayed(instrumental) > GetMusicTimeLength(instrumental)) || (GetMusicTimePlayed(player) > GetMusicTimeLength(player))){
 			misses = 13;
 			playerArrows.clear();
 			computerArrows.clear();

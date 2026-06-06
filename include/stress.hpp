@@ -14956,9 +14956,11 @@ void Stress(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArr
     pico_stress = LoadTexture("/cd/blammed/pico.png");
     pico_stress.width = 1026;
     pico_stress.height = 513;
+    SetTextureFilter(pico_stress, TEXTURE_FILTER_BILINEAR);
     boyfriend_stress = LoadTexture("/cd/shared/boyfriend.png");
     boyfriend_stress.width = 900;
     boyfriend_stress.height = 675;
+    SetTextureFilter(boyfriend_stress, TEXTURE_FILTER_BILINEAR);
     currentFrame_stress = 0;
     frameCounter_stress = 0;
     *instrumental = LoadMusicStream("/cd/stress/stress.wav");
