@@ -2,6 +2,9 @@
 `pc-old` is the original code, originally made for pc, but now natively on Dreamcast.
 I am working on making this code more *native* to the Dreamcast instead of using cross-platform libraries like `libwav` and `raylib`.
 
+Release 1.0 works on real hardware and emulation (but is out of sync i think)
+Release 1.1 ONLY works on emulators (is in sync)
+
 I DO NOT OWN ANY OF THE ASSETS FOUND IN `resources/`
 
 https://github.com/FunkinCrew/funkin.assets/
