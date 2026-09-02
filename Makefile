@@ -14,7 +14,7 @@ rm-elf:
 	-rm -f $(TARGET) romdisk.*
 
 $(TARGET): $(OBJS)
-	kos-cc -o $(TARGET) $(OBJS) -lpthread -lraylib -lGL -lstdc++ -lkosutils
+	kos-cc -o $(TARGET) $(OBJS) -lpthread -lraylib -lGL -lstdc++ -lkosutils -O2
 	$(KOS_STRIP) $(TARGET)
 
 run: $(TARGET)
@@ -40,4 +40,4 @@ iso:
   		-N \
   		-D build/disc \
   		-o build/fnf.cdi
-	
+	@echo CDI is in build/fnf.cdi

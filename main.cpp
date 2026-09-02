@@ -10,11 +10,6 @@
 #include "stress.hpp"
 #include "scenes.hpp"
 #include <string>
-// TODO: might need to write audio helper for N64's audio subsystem 
-// https://n64squid.com/homebrew/libdragon/audio/playing/
-#if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h>
-#endif
 
 // DEFINITIONS
 int targetRadius = 64;
@@ -94,7 +89,6 @@ Sound confirmMenu;
 Sound cancelMenu;
 Sound gameOverEnd;
 
-// must be a 2600 width
 // idle animation must be 5 frames long
 enum EnemyStates{
 	// idle is on another height level
@@ -125,12 +119,10 @@ int main()
 {
 	void UpdateDrawFrame();
 	// Create the window and OpenGL context
-	// look into using render textures for downscaling/upscaling the game to different resolutions
 	InitWindow(640, 480, "Vibin'");
 	InitAudioDevice();
 	// NOTE: you can remove this just expect some glitchy animations and trailSize to go down really quick
 	SetTargetFPS(60);
-	// LOAD ALL THE VARIABLES HERE, WEB BUILD ERRORS OUT OTHERWISE
 	for(int i = 0; i < totalSongCount; i++){
 		songListColors[i] = WHITE;
 	}
@@ -144,14 +136,12 @@ int main()
 	fnfFont = LoadFont("/cd/FridayNightFunkin-Regular.fnt");
 	storageBlammed = LoadStorageValue(STORAGE_POSITION_BLAMMED);
 	storageStress = LoadStorageValue(STORAGE_POSITION_STRESS);
-	//SeekMusicStream(titleTrack, 50);
 	Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
 	PlayMusicStream(titleTrack);
-	//PlayMusicStream(titleTrack);
 	#if defined(PLATFORM_WEB)
 		emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 	#else
-		while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
+		while (!WindowShouldClose())
 		{
 			UpdateDrawFrame();
 		}
@@ -248,7 +238,6 @@ void CheckCollisionTrail(float x, PlayerStates hitState){
 	}
 }
 
-// make scene manager later? (done, its the one big switch statement of DOOOOOOOMMMMMM)
 // GAME LOOP
 void UpdateDrawFrame(){
 	switch (sceneIndex)
@@ -258,7 +247,6 @@ void UpdateDrawFrame(){
 		framesCounter++;
 		camera.zoom = 1.2f;
 		if(shouldFade){
-			// this may unnecessarily load new textures into VRAM, cleanup song before?
 			if(gameOverFade.a >= 250){
 				playerArrows.clear();
 				computerArrows.clear();
@@ -305,7 +293,6 @@ void UpdateDrawFrame(){
 		BeginMode2D(camera);
 		ClearBackground(gameOverFade);
 		DrawTextureRec(gameOver_boyfriend, gameOverRec, {(1280/2+142)/2, 300/2}, WHITE);
-		//DrawTextEx(fnfFont, "PRESS ENTER", {1280/2-142, 720/2}, 48, 1.0f, WHITE);
 		EndMode2D();
 		DrawRectangle(0,0,640,480,gameOverFade);
 		EndDrawing();
@@ -438,7 +425,6 @@ void UpdateDrawFrame(){
 		}else if(difficultySelect == 2){
 			DrawTextEx(scoreFont, "Difficulty: Hard", {1000/2, 24/2}, 24/2, -2, WHITE);
 		}
-		//DrawText(std::to_string(difficultySelect).c_str(), 1280/2, 720/2, 48 , WHITE);
 		EndDrawing();
 		break;
 	case introText:
@@ -457,21 +443,7 @@ void UpdateDrawFrame(){
 		}
 		if(GetMusicTimePlayed(titleTrack) >= 4.5 && GetMusicTimePlayed(titleTrack) < 6.5){
 			ClearBackground(BLACK);
-		}/*
-		if(songEnd >= 5 && songEnd < 6){
-			DrawText("HERE", 1280/2 - 100, 720/2 - 30, 48, WHITE);
 		}
-		if(songEnd >= 6 && songEnd < 7){
-			ClearBackground(BLACK);
-			DrawText("IT", 1280/2 - 100, 720/2 - 30, 48, WHITE);
-		}
-		if(songEnd >= 7 && songEnd < 8){
-			ClearBackground(BLACK);
-			DrawText("COMES", 1280/2 - 100, 720/2 - 30, 48, WHITE);
-		}
-		if(songEnd >= 6.5 && songEnd < 8.5){
-			ClearBackground(BLACK);
-		}*/
 		if(GetMusicTimePlayed(titleTrack) >= 7){
 			DrawTextEx(fnfFont, "FRIDAY", {(1280/2 - 100)/2, (720/2 - 30)/2}, 48/2, 1.0f, WHITE);
 		}
@@ -484,10 +456,6 @@ void UpdateDrawFrame(){
 		if(GetMusicTimePlayed(titleTrack) >= 9.5){
 			sceneIndex = promptMenu;
 		}
-		/*if(songEnd >= 10.6){
-			ClearBackground(WHITE);
-			DrawTexture(metalPipe, 0, 0, WHITE);
-		}*/
 		EndDrawing();
 		
 		break;
@@ -534,14 +502,11 @@ void UpdateDrawFrame(){
 				PlaySound(confirmMenu);
 			}
 			
-			//UnloadTexture(gfSpeakerTemp);
 		}
 		BeginDrawing();
 		ClearBackground(BLACK);
-		//DrawTexture(gfSpeakerTemp, 550, 50, WHITE);
 		DrawTextureRec(gfSpeakerTemp, gfSpeakerRec, {550/2, 50/2}, WHITE);
 		DrawTextureRec(logoAtlas, logoRec, {-100/2, -100/2}, WHITE);
-		//DrawText("PRESS ENTER TO PLAY", 48, 720/2 + 232, 96, WHITE);
 		DrawTextureRec(titleText, titleTextRec, {128/2, (720/2 + 232)/2}, WHITE);
 		EndDrawing();		
 	   break;
@@ -613,10 +578,6 @@ void UpdateDrawFrame(){
 			PlaySound(cancelMenu);
 		}
 		if((IsKeyPressed(KEY_ENTER)|| IsGamepadButtonPressed(0, 15) || IsGamepadButtonPressed(0, 7)) && freePlayRec.y == freePlay.height){
-			/*StopMusicStream(titleTrack);
-			TestSong(&arrows, 1000, &instrumental, &player);
-			songName = "TestSong";
-			sceneIndex = songChosen;*/
 			goToSongList = true;
 			if(!IsSoundPlaying(confirmMenu)){
 				PlaySound(confirmMenu);
@@ -658,31 +619,31 @@ void UpdateDrawFrame(){
 		}
 		framesCounter++;
 		// make all the input polls execute a function instead of this repeating mess
-		if(!playerArrows.empty() && IsKeyPressed(KEY_LEFT) || IsGamepadButtonPressed(0, 4) || IsGamepadButtonPressed(0, 8)){
+		if(!playerArrows.empty() && (IsKeyPressed(KEY_LEFT) || IsGamepadButtonPressed(0, 4) || IsGamepadButtonPressed(0, 8))){
 			CheckCollision(850/2, leftPlayer, leftPlayerMissed);
 		}
-		if(!playerArrows.empty() && IsKeyDown(KEY_LEFT) || IsGamepadButtonDown(0, 4) || IsGamepadButtonDown(0, 8)){
+		if(!playerArrows.empty() && (IsKeyDown(KEY_LEFT) || IsGamepadButtonDown(0, 4) || IsGamepadButtonDown(0, 8))){
 			CheckCollisionTrail(850/2, leftPlayer);
 			leftColor = PURPLE;
 		}
-		if(!playerArrows.empty() && IsKeyPressed(KEY_DOWN) || IsGamepadButtonPressed(0, 3) || IsGamepadButtonPressed(0, 7)){
+		if(!playerArrows.empty() && (IsKeyPressed(KEY_DOWN) || IsGamepadButtonPressed(0, 3) || IsGamepadButtonPressed(0, 7))){
 			CheckCollision(950/2, downPlayer, downPlayerMissed);
 		}
-		if(!playerArrows.empty() && IsKeyDown(KEY_DOWN) || IsGamepadButtonDown(0, 3) || IsGamepadButtonDown(0, 7)){
+		if(!playerArrows.empty() && (IsKeyDown(KEY_DOWN) || IsGamepadButtonDown(0, 3) || IsGamepadButtonDown(0, 7))){
 			CheckCollisionTrail(950/2, downPlayer);
 			downColor = BLUE;
 		}
-		if(!playerArrows.empty() && IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, 1) || IsGamepadButtonPressed(0, 5)){
+		if(!playerArrows.empty() && (IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, 1) || IsGamepadButtonPressed(0, 5))){
 			CheckCollision(1050/2, upPlayer, upPlayerMissed);
 		}
-		if(!playerArrows.empty() && IsKeyDown(KEY_UP) || IsGamepadButtonDown(0, 1) || IsGamepadButtonDown(0, 5)){
+		if(!playerArrows.empty() && (IsKeyDown(KEY_UP) || IsGamepadButtonDown(0, 1) || IsGamepadButtonDown(0, 5))){
 			CheckCollisionTrail(1050/2, upPlayer);
 			upColor = GREEN;
 		}
-		if(!playerArrows.empty() && IsKeyPressed(KEY_RIGHT) || IsGamepadButtonPressed(0, 2) || IsGamepadButtonPressed(0, 6)){
+		if(!playerArrows.empty() && (IsKeyPressed(KEY_RIGHT) || IsGamepadButtonPressed(0, 2) || IsGamepadButtonPressed(0, 6))){
 			CheckCollision(1150/2, rightPlayer, rightPlayerMissed);
 		}
-		if(!playerArrows.empty() && IsKeyDown(KEY_RIGHT) || IsGamepadButtonDown(0, 2) || IsGamepadButtonDown(0, 6)){
+		if(!playerArrows.empty() && (IsKeyDown(KEY_RIGHT) || IsGamepadButtonDown(0, 2) || IsGamepadButtonDown(0, 6))){
 			CheckCollisionTrail(1150/2, rightPlayer);
 			rightColor = RED;
 		}
@@ -783,7 +744,6 @@ void UpdateDrawFrame(){
 		DrawTextEx(scoreFont, (std::string("Score: ") + std::to_string(score)).c_str(), {900/2, 460}, 18/2, 0, WHITE); // score	
 		for (int i = playerArrows.size() - 1; i >= 0; i--)
 		{
-			// if an arrow is off screen, consider not drawing it for performance (done)
 			if(playerArrows.at(i).pos.y < 560){
 				playerArrows.at(i).Draw();
 			}
@@ -791,7 +751,6 @@ void UpdateDrawFrame(){
 		}
 		for (int i = computerArrows.size() - 1; i >= 0; i--)
 		{
-			// if an arrow is off screen, consider not drawing it for performance (done)
 			if(computerArrows.at(i).pos.y < 560){
 				computerArrows.at(i).Draw();
 			}
@@ -832,7 +791,7 @@ void UpdateDrawFrame(){
 			}
 			playerArrows.pop_back();
 		}
-		if((GetMusicTimePlayed(instrumental) > GetMusicTimeLength(instrumental)) || (GetMusicTimePlayed(player) > GetMusicTimeLength(player))){
+		if((GetMusicTimePlayed(instrumental) >= GetMusicTimeLength(instrumental) - 5) || (GetMusicTimePlayed(player) >= GetMusicTimeLength(player) - 5)){
 			misses = 13;
 			playerArrows.clear();
 			computerArrows.clear();
@@ -848,7 +807,7 @@ void UpdateDrawFrame(){
 			PlayMusicStream(titleTrack);
 			sceneIndex = songList;
 		}
-		if(IsGamepadButtonPressed(0, 6)){
+		if(GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) >= 1.0f){ //RT to exit
 			score = 0;
 			misses = 13;
 			playerArrows.clear();
