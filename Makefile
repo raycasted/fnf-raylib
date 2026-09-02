@@ -3,7 +3,7 @@ OBJS = main.o
 
 KOS_CFLAGS += -I${KOS_PORTS}/include/raylib -Iinclude/. -O2
 
-all: rm-elf $(TARGET)
+all: rm-elf $(TARGET) iso
 
 include $(KOS_BASE)/Makefile.rules
 
@@ -24,3 +24,20 @@ dist: $(TARGET)
 	-rm -f $(OBJS) romdisk.img
 	$(KOS_STRIP) $(TARGET)
 
+iso:
+	mkdir -p build/disc
+	cp -r resources/* build/disc/
+	sh-elf-objcopy -O binary main.elf build/disc/1ST_READ.BIN
+	mkdcdisc \
+  		-e main.elf \
+  		-r 20260524 \
+  		-a hdfsyu \
+  		-n "Friday Night Funkin'" \
+  		-c cdda-tracks/t1-stressfull.wav \
+  		-c cdda-tracks/t2-titletrack.wav \
+  		-c cdda-tracks/t3-blammedfull.wav \
+  		-c cdda-tracks/t4-gameover.wav \
+  		-N \
+  		-D build/disc \
+  		-o build/fnf.cdi
+	
