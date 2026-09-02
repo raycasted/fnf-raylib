@@ -17,6 +17,13 @@ You can play the game with the D-PAD, OR with the buttons (which I think is bett
 
 Press RIGHT TRIGGER to go back to the song selection screen from a level.
 
+# PROOF this works on REAL HARDWARE
+
+<a>
+  <img src="https://cdn.discordapp.com/attachments/925678813227151381/1509303696775974942/IMG_20260527_231314.jpg?ex=6a993a5a&is=6a97e8da&hm=fdfd2835c64c81287f1b910b646e03e7b247fc1dae5cca8297cee4317a12f32e&" width="500">
+</a>
+
+(this is the dev of the Dreamcast Balatro port playing my game heheheh)
 # Dependencies
 ~~Please see the [raylib wiki](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux) for dependencies, as this project depends on raylib, and compiles it from scratch.~~ (applies to `pc-old`)
 
