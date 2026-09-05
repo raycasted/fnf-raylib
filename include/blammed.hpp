@@ -4,6 +4,8 @@
 #include "raylib.h"
 #include "CameraEase.hpp"
 #include <vector>
+#include <dc/sound/sfxmgr.h>
+#include <wav/sndwav.h>
 // note: maybe move implementations into a cpp file?
 Texture2D behindTrain_TestSong;
 Texture2D city_TestSong;
@@ -5771,7 +5773,7 @@ arrow234.side = playerSide;
 playerArrowList->insert(playerArrowList->begin(), arrow234);
     
 }
-void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArrowList, Music* instrumental, Music* player, Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera, int difficulty){
+void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArrowList, wav_stream_hnd_t* instrumental, wav_stream_hnd_t* player, Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera, int difficulty){
     // you can use the start of the chart as an initialization section for all your textures etc.
     behindTrain_TestSong = LoadTexture("/cd/blammed/behindTrain.png");
     behindTrain_TestSong.width = 1108;
@@ -5805,10 +5807,10 @@ void TestSong(std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerA
     SetTextureFilter(boyfriend_TestSong, TEXTURE_FILTER_BILINEAR);
     currentFrame_TestSong = 0;
     frameCounter_TestSong = 0;
-    *instrumental = LoadMusicStream("/cd/blammed/blammed.wav");
-    *player = LoadMusicStream("/cd/blammed/blammed-player.wav");
+    *instrumental = wav_create("/cd/blammed/blammed.wav", 0);
+    *player = wav_create("/cd/blammed/blammed-player.wav", 0);
     gfSpeakerRec_TestSong = { 0.0f, 0.0f, (float)gfSpeaker_TestSong.width/5, (float)gfSpeaker_TestSong.height/4 };
-    *enemyRec = {0.0f, 260.0f, (float)pico_TestSong.width/4, (float)pico_TestSong.height/2};
+    *enemyRec = {0.0f, 260.0f, (float)pico_TestSong.width/4-16, (float)pico_TestSong.height/2};
     *playerRec = {0.0f, 225.0f, (float)boyfriend_TestSong.width/4, (float)boyfriend_TestSong.height/3};
     camera->target = {640/2,360/2};
     camera->offset = {640/2, 360/2};

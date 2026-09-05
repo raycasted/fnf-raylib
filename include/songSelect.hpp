@@ -35,7 +35,7 @@ void songDraw(std::string songName, Camera2D* camera, Rectangle* playerRec, Rect
 		StressDraw(playerRec, enemyRec, camera);
 	}
 }
-void songLoad(std::string songName, std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArrowList, Music* instrumental, Music* player, Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera, int difficulty){
+void songLoad(std::string songName, std::vector<Arrow>* playerArrowList, std::vector<Arrow>* computerArrowList, wav_stream_hnd_t* instrumental, wav_stream_hnd_t* player, Rectangle* playerRec, Rectangle* enemyRec, Camera2D* camera, int difficulty){
     if(songName == "TestSong"){
 		TestSong(playerArrowList, computerArrowList, instrumental, player, playerRec, enemyRec, camera, difficulty);
 	}else if(songName == "Stress"){

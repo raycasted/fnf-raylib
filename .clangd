@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-I/Users/hdfsyu/fnf-raylib, -I/Users/hdfsyu/fnf-raylib/include, -I/opt/toolchains/dc/kos/kernel/arch/dreamcast/include, -I/opt/toolchains/dc/kos-ports/libwav/inst/include, -I/opt/toolchains/dc/kos/include]

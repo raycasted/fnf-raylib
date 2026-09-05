@@ -1,5 +1,7 @@
 #pragma once
 #include <raylib.h>
+#include <dc/sound/sfxmgr.h>
+#include <wav/sndwav.h>
 enum Scenes{ // scenes should be in numbered order
 	introText = 0,
 	promptMenu = 1,
@@ -10,18 +12,11 @@ enum Scenes{ // scenes should be in numbered order
 	songList = 6
 };
 // sound fx pan should be 128, which is middle
-// MENU CHANNELS:
-// scrollMenu - chn 1
-// confirmMenu - chn 3
-// cancelMenu - chn 5
-// SONGCHOSEN CHANNELS:
-// missNote - chn 1
-// gameOverEnd - chn 1
-void Load_menus(Sound* scrollMenu, Sound* confirmMenu, Sound* cancelMenu, Music* titleTrack, Texture2D* gfSpeakerTemp, Texture2D* freePlay, Texture2D* credits, Texture2D* logoAtlas, Texture2D* titleText, Texture2D* menuBG, Rectangle* freePlayRec, Rectangle* creditsRec, Rectangle* gfSpeakerRec, Rectangle* logoRec, Rectangle* titleTextRec){
-	*scrollMenu = LoadSound("/cd/scrollMenu.wav");
-	*confirmMenu = LoadSound("/cd/confirmMenu.wav");
-	*cancelMenu = LoadSound("/cd/cancelMenu.wav");
-	*titleTrack = LoadMusicStream("/cd/title-track.wav");
+void Load_menus(sfxhnd_t* scrollMenu, sfxhnd_t* confirmMenu, sfxhnd_t* cancelMenu, wav_stream_hnd_t* titleTrack, Texture2D* gfSpeakerTemp, Texture2D* freePlay, Texture2D* credits, Texture2D* logoAtlas, Texture2D* titleText, Texture2D* menuBG, Rectangle* freePlayRec, Rectangle* creditsRec, Rectangle* gfSpeakerRec, Rectangle* logoRec, Rectangle* titleTextRec){
+	*scrollMenu = snd_sfx_load("/cd/scrollMenu.wav");
+	*confirmMenu = snd_sfx_load("/cd/confirmMenu.wav");
+	*cancelMenu = snd_sfx_load("/cd/cancelMenu.wav");
+	*titleTrack = wav_create("/cd/title-track.wav", 1);
 	*gfSpeakerTemp = LoadTexture("/cd/shared/gfDanceTitle2.png");
 	gfSpeakerTemp->width = 1816;
 	gfSpeakerTemp->height = 1332;
@@ -48,11 +43,11 @@ void Load_menus(Sound* scrollMenu, Sound* confirmMenu, Sound* cancelMenu, Music*
 	*titleTextRec = {0.0f, 0.0f, (float)titleText->width, (float)titleText->height/3};
 	TraceLog(LOG_WARNING, "Loaded all menus.");
 }
-void Unload_menus(Sound* scrollMenu, Sound* confirmMenu, Sound* cancelMenu, Music* titleTrack, Texture2D* gfSpeakerTemp, Texture2D* freePlay, Texture2D* credits, Texture2D* logoAtlas, Texture2D* titleText, Texture2D* menuBG){
-	UnloadSound(*scrollMenu);
-	UnloadSound(*confirmMenu);
-	UnloadSound(*cancelMenu);
-	UnloadMusicStream(*titleTrack);
+void Unload_menus(sfxhnd_t* scrollMenu, sfxhnd_t* confirmMenu, sfxhnd_t* cancelMenu, wav_stream_hnd_t* titleTrack, Texture2D* gfSpeakerTemp, Texture2D* freePlay, Texture2D* credits, Texture2D* logoAtlas, Texture2D* titleText, Texture2D* menuBG){
+	snd_sfx_unload(*scrollMenu);
+	snd_sfx_unload(*confirmMenu);
+	snd_sfx_unload(*cancelMenu);
+	wav_destroy(*titleTrack);
 	UnloadTexture(*freePlay);
 	UnloadTexture(*gfSpeakerTemp);
 	UnloadTexture(*credits);
@@ -61,11 +56,10 @@ void Unload_menus(Sound* scrollMenu, Sound* confirmMenu, Sound* cancelMenu, Musi
 	UnloadTexture(*titleText);
 	TraceLog(LOG_WARNING, "Unloaded all menus.");
 }
-void Load_SongChosen(Sound* wrong, Sound* gameOverEnd, Music* gameOverBGM, Texture2D* leftArrow, Texture2D* upArrow, Texture2D* downArrow, Texture2D* rightArrow, Texture2D* holdAssets, Texture2D* notes, Texture2D* gameOver_boyfriend, Rectangle* gameOverRec){
-	*wrong = LoadSound("/cd/missnote.wav");
-	SetSoundVolume(*wrong, 0.3);
-	*gameOverEnd = LoadSound("/cd/gameOverEnd.wav");
-	*gameOverBGM = LoadMusicStream("/cd/gameOver.wav");
+void Load_SongChosen(sfxhnd_t* wrong, sfxhnd_t* gameOverEnd, wav_stream_hnd_t* gameOverBGM, Texture2D* leftArrow, Texture2D* upArrow, Texture2D* downArrow, Texture2D* rightArrow, Texture2D* holdAssets, Texture2D* notes, Texture2D* gameOver_boyfriend, Rectangle* gameOverRec){
+	*wrong = snd_sfx_load("/cd/missnote.wav");
+	*gameOverEnd = snd_sfx_load("/cd/gameOverEnd.wav");
+	*gameOverBGM = wav_create("/cd/gameOver.wav", 1);
 	*leftArrow = LoadTexture("/cd/leftArrow.png");
 	leftArrow->width = 80;
 	leftArrow->height = 78;
@@ -90,10 +84,10 @@ void Load_SongChosen(Sound* wrong, Sound* gameOverEnd, Music* gameOverBGM, Textu
 	*gameOverRec = {0.0f, 0.0f, (float)gameOver_boyfriend->width/29, (float)gameOver_boyfriend->height};
 	TraceLog(LOG_WARNING, "Loaded Song UI.");
 }
-void Unload_SongChosen(Sound* wrong, Sound* gameOverEnd, Music* gameOverBGM, Texture2D* leftArrow, Texture2D* upArrow, Texture2D* downArrow, Texture2D* rightArrow, Texture2D* holdAssets, Texture2D* notes, Texture2D* gameOver_boyfriend){
-	UnloadSound(*wrong);
-	UnloadSound(*gameOverEnd);
-	UnloadMusicStream(*gameOverBGM);
+void Unload_SongChosen(sfxhnd_t* wrong, sfxhnd_t* gameOverEnd, wav_stream_hnd_t* gameOverBGM, Texture2D* leftArrow, Texture2D* upArrow, Texture2D* downArrow, Texture2D* rightArrow, Texture2D* holdAssets, Texture2D* notes, Texture2D* gameOver_boyfriend){
+	snd_sfx_unload(*wrong);
+	snd_sfx_unload(*gameOverEnd);
+	wav_destroy(*gameOverBGM);
 	UnloadTexture(*leftArrow);
 	UnloadTexture(*upArrow);
 	UnloadTexture(*rightArrow);
@@ -103,13 +97,13 @@ void Unload_SongChosen(Sound* wrong, Sound* gameOverEnd, Music* gameOverBGM, Tex
 	UnloadTexture(*gameOver_boyfriend);
 	TraceLog(LOG_WARNING, "Unloaded Song UI.");
 }
-/*void Load_GameOver(Texture2D* gameOver_boyfriend, Music* gameOverBGM, Music* gameOverEnd){
+/*void Load_GameOver(Texture2D* gameOver_boyfriend, wav_stream_hnd_t* gameOverBGM, wav_stream_hnd_t* gameOverEnd){
 	*gameOver_boyfriend = LoadTexture("resources/boyfriendGameOver.png");
 	*gameOverBGM = LoadMusicStream("resources/gameOver.mp3");
 	*gameOverEnd = LoadMusicStream("resources/gameOverEnd.mp3");
 	gameOver_boyfriend->width = 13050; // this is needed so ES3 can load our huge image
 }
-void Unload_GameOver(Texture2D* gameOver_boyfriend, Music* gameOverBGM, Music* gameOverEnd){
+void Unload_GameOver(Texture2D* gameOver_boyfriend, wav_stream_hnd_t* gameOverBGM, wav_stream_hnd_t* gameOverEnd){
 	UnloadTexture(*gameOver_boyfriend);
 	UnloadMusicStream(*gameOverBGM);
 	UnloadMusicStream(*gameOverEnd);
@@ -140,15 +134,15 @@ void Load_SongList(Texture2D* menuBG){
 void Unload_SongList(Texture2D* menuBG){
 	UnloadTexture(*menuBG);
 }
-void Load_SongChosen(Texture2D* leftArrow, Texture2D* downArrow, Texture2D* upArrow, Texture2D* rightArrow, Sound* wrong, Music* titleTrack){
+void Load_SongChosen(Texture2D* leftArrow, Texture2D* downArrow, Texture2D* upArrow, Texture2D* rightArrow, sfxhnd_t* wrong, wav_stream_hnd_t* titleTrack){
 	*leftArrow = LoadTexture("resources/leftArrow.png");
 	*upArrow = LoadTexture("resources/upArrow.png");
 	*rightArrow = LoadTexture("resources/rightArrow.png");
 	*downArrow = LoadTexture("resources/downArrow.png");
-	*wrong = LoadSound("resources/buzzer-error.mp3");
+	*wrong = snd_sfx_load("resources/buzzer-error.mp3");
 	UnloadMusicStream(*titleTrack);
 }
-void Unload_SongChosen(Texture2D* leftArrow, Texture2D* downArrow, Texture2D* upArrow, Texture2D* rightArrow, Sound* wrong, Music* titleTrack, Music* instrumental, Music* player){
+void Unload_SongChosen(Texture2D* leftArrow, Texture2D* downArrow, Texture2D* upArrow, Texture2D* rightArrow, sfxhnd_t* wrong, wav_stream_hnd_t* titleTrack, wav_stream_hnd_t* instrumental, wav_stream_hnd_t* player){
 	UnloadTexture(*leftArrow);
 	UnloadTexture(*upArrow);
 	UnloadTexture(*rightArrow);

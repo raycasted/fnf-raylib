@@ -9,12 +9,14 @@ include $(KOS_BASE)/Makefile.rules
 
 clean: rm-elf
 	-rm -f $(OBJS)
+	rm -rf build/disc/*
+	rm -rf build/fnf.cdi
 
 rm-elf:
 	-rm -f $(TARGET) romdisk.*
 
 $(TARGET): $(OBJS)
-	kos-cc -o $(TARGET) $(OBJS) -lpthread -lraylib -lGL -lstdc++ -lkosutils -O2
+	kos-cc -o $(TARGET) $(OBJS) -lpthread -lraylib -lGL -lstdc++ -lkosutils -lwav -O2
 	$(KOS_STRIP) $(TARGET)
 
 run: $(TARGET)

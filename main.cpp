@@ -10,7 +10,9 @@
 #include "stress.hpp"
 #include "scenes.hpp"
 #include <string>
-
+#include <dc/sound/sfxmgr.h>
+#include <wav/sndwav.h>
+#include <kos/fs.h>
 // DEFINITIONS
 int targetRadius = 64;
 int score = 0;
@@ -25,6 +27,8 @@ int currentFrame4 = 0; // when to exit out of promptMenu
 int framesSpeed = 15;
 double loadStart;
 double loadDuration;
+float songEnd = false; // haha funny
+float songStart = 0;
 Color leftColor = WHITE;
 Color downColor = WHITE;
 Color upColor = WHITE;
@@ -79,15 +83,15 @@ RenderTexture2D target;
 Font fnfFont;
 Font scoreFont;
 // DEFINE sounds
-Music gameOverBGM;
-Music player;
-Music instrumental;
-Music titleTrack;
-Sound wrong;
-Sound scrollMenu;
-Sound confirmMenu;
-Sound cancelMenu;
-Sound gameOverEnd;
+wav_stream_hnd_t gameOverBGM;
+wav_stream_hnd_t player;
+wav_stream_hnd_t instrumental;
+wav_stream_hnd_t titleTrack;
+sfxhnd_t wrong;
+sfxhnd_t scrollMenu;
+sfxhnd_t confirmMenu;
+sfxhnd_t cancelMenu;
+sfxhnd_t gameOverEnd;
 
 // idle animation must be 5 frames long
 enum EnemyStates{
@@ -114,15 +118,31 @@ enum PlayerStates{
 	rightPlayerMissed = 225*2,
 	downPlayerMissed = 225*3,
 };
+void SeekWav(wav_stream_hnd_t* wavToSeek, std::string songName, bool isPlayer, int seconds){
+	wav_destroy(*wavToSeek);
+	file_t file;
+	if(songName == "Stress"){
+		if(isPlayer) file = fs_open("/cd/stress/stress-player.wav", O_RDONLY);
+		else file = fs_open("/cd/stress/stress.wav", O_RDONLY);
+	}else{
+		if(isPlayer) file = fs_open("/cd/blammed/blammed-player.wav", O_RDONLY);
+		else file = fs_open("/cd/blammed/blammed.wav", O_RDONLY);
+	}
+	
+	long bytesToSeek = (long)(seconds * 44100 * 1 / 2.0);
+	*wavToSeek = wav_create_fd(file, 0);
+	fs_seek(file, bytesToSeek, SEEK_SET);
+}
+void UpdateDrawFrame();
 // INITIALIZE
 int main()
 {
-	void UpdateDrawFrame();
 	// Create the window and OpenGL context
 	InitWindow(640, 480, "Vibin'");
-	InitAudioDevice();
 	// NOTE: you can remove this just expect some glitchy animations and trailSize to go down really quick
 	SetTargetFPS(60);
+	wav_init();
+	
 	for(int i = 0; i < totalSongCount; i++){
 		songListColors[i] = WHITE;
 	}
@@ -137,15 +157,11 @@ int main()
 	storageBlammed = LoadStorageValue(STORAGE_POSITION_BLAMMED);
 	storageStress = LoadStorageValue(STORAGE_POSITION_STRESS);
 	Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
-	PlayMusicStream(titleTrack);
-	#if defined(PLATFORM_WEB)
-		emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
-	#else
-		while (!WindowShouldClose())
-		{
-			UpdateDrawFrame();
-		}
-	#endif
+	wav_play(titleTrack);
+	while (!WindowShouldClose())
+	{
+		UpdateDrawFrame();
+	}
 	// CLEANUP
 	UnloadTexture(leftArrow);
 	UnloadTexture(downArrow);
@@ -181,7 +197,7 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 			playerRec.x = hitState;
 			misses--;
 			if(isPaused){
-				SetMusicVolume(player, 1);
+				wav_volume(player, 255);
 				isPaused = false;
 			}
 			if(playerArrows.back().trailSize == 0){
@@ -194,7 +210,7 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 			playerRec.x = hitState;
 			misses--;
 			if(isPaused){
-				SetMusicVolume(player, 1);
+				wav_volume(player, 255);
 				isPaused = false;
 			}
 			if(playerArrows.back().trailSize == 0){
@@ -206,9 +222,9 @@ void CheckCollision(float x, PlayerStates hitState, PlayerStates missState){
 		playerRec.y = 450;
 		score -= 10;
 		misses++;
-		SetMusicVolume(player, 0);
+		wav_volume(player, 0);
 		isPaused = true;
-		PlaySound(wrong);
+		snd_sfx_play(wrong, 85, 128);
 		playerRec.x = missState;
 	}
 }
@@ -229,7 +245,7 @@ void CheckCollisionTrail(float x, PlayerStates hitState){
 					score += playerArrows.back().trailSize;
 				}
 				if(isPaused){
-					SetMusicVolume(player, 1);
+					wav_volume(player, 255);
 					isPaused = false;
 				}
 				playerArrows.pop_back();
@@ -243,7 +259,6 @@ void UpdateDrawFrame(){
 	switch (sceneIndex)
 	{
 	case gameOver:
-		UpdateMusicStream(gameOverBGM);
 		framesCounter++;
 		camera.zoom = 1.2f;
 		if(shouldFade){
@@ -256,17 +271,21 @@ void UpdateDrawFrame(){
 				framesCounter = 0;
 				shouldFade = false;
 				gameOverFade = {0,0,0,0};
-				StopMusicStream(gameOverBGM);
+				wav_stop(gameOverBGM);
 				framesSpeed = 15;
 				loadStart = GetTime();
 				songCleanup(songName);
+				wav_destroy(instrumental);
+				wav_destroy(player);
 				songLoad(songName, &playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				loadDuration = GetTime() - loadStart;
-				SeekMusicStream(instrumental, loadDuration);
-				SeekMusicStream(player, loadDuration);
-				PlayMusicStream(instrumental);
-				PlayMusicStream(player);
+				SeekWav(&instrumental, songName, false, loadDuration);
+				SeekWav(&player, songName, true, loadDuration);
+				wav_play(instrumental);
+				wav_play(player);
 				camera.zoom = 1.0f;
+				songStart = GetTime();
+				songEnd = 0;
 				sceneIndex = songChosen;
 			}
 			framesCounter++;
@@ -297,8 +316,8 @@ void UpdateDrawFrame(){
 		DrawRectangle(0,0,640,480,gameOverFade);
 		EndDrawing();
 		if(IsGamepadButtonPressed(0, 7) && !shouldFade){
-			StopMusicStream(gameOverBGM);
-			PlaySound(gameOverEnd);
+			wav_stop(gameOverBGM);
+			snd_sfx_play(gameOverEnd, 255, 128);
 			shouldFade = true;
 		}else if(IsGamepadButtonPressed(0, 6)){
 			songCleanup(songName);
@@ -312,18 +331,18 @@ void UpdateDrawFrame(){
 			gameOverFade = {0,0,0,0};
 			framesSpeed = 15;
 			camera.zoom = 1.0f;
-			StopMusicStream(gameOverBGM);
+			wav_stop(gameOverBGM);
 			Unload_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend);
 			Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
-			PlayMusicStream(titleTrack);
+			wav_play(titleTrack);
+			songEnd = 0;
 			sceneIndex = songList;
 		}
 		break;
 	case creditsList:
-		UpdateMusicStream(titleTrack);
 		if(IsGamepadButtonPressed(0, 6)){
 			sceneIndex = titleScreen;
-			PlaySound(cancelMenu);
+			snd_sfx_play(cancelMenu, 255, 128);
 		}
 		
 		BeginDrawing();
@@ -337,10 +356,9 @@ void UpdateDrawFrame(){
 		EndDrawing();
 		break;
 	case songList:
-		UpdateMusicStream(titleTrack);
 		if(IsGamepadButtonPressed(0, 6)){
 			sceneIndex = titleScreen;
-			PlaySound(cancelMenu);
+			snd_sfx_play(cancelMenu, 255, 128);
 		}
 		if(IsGamepadButtonPressed(0, 3)){
 			songListColors[listIterator].r = 255;
@@ -348,7 +366,7 @@ void UpdateDrawFrame(){
 				listIterator++;
 			}
 			songListColors[listIterator].r = 0;
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}
 		if(IsGamepadButtonPressed(0, 1)){
 			songListColors[listIterator].r = 255;
@@ -356,7 +374,7 @@ void UpdateDrawFrame(){
 				listIterator--;
 			}
 			songListColors[listIterator].r = 0;
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}
 		if(IsGamepadButtonPressed(0, 2)){
 			if(difficultySelect+1 < 3){
@@ -364,7 +382,7 @@ void UpdateDrawFrame(){
 			}else if(difficultySelect == 2){
 				difficultySelect = 0;
 			}
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}
 		if(IsGamepadButtonPressed(0, 4)){
 			if(difficultySelect-1 >= 0){
@@ -372,7 +390,7 @@ void UpdateDrawFrame(){
 			}else if(difficultySelect == 0){
 				difficultySelect = 2;
 			}
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}
 		if(IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, 15) || IsGamepadButtonPressed(0, 7)){
 			currentFrame = 0;
@@ -380,34 +398,39 @@ void UpdateDrawFrame(){
 			switch (listIterator)
 			{
 			case 0:
-				StopMusicStream(titleTrack);
+				songName = "TestSong";
+				wav_stop(titleTrack);
 				loadStart = GetTime();
 				Unload_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG);
 				TestSong(&playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				Load_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend, &gameOverRec);
 				loadDuration = GetTime() - loadStart;
-				SeekMusicStream(instrumental, loadDuration);
-				SeekMusicStream(player, loadDuration);
-				PlayMusicStream(instrumental);
-				PlayMusicStream(player);
-				songName = "TestSong";
+				SeekWav(&instrumental, songName, false, loadDuration);
+				SeekWav(&player, songName, true, loadDuration);
+				wav_play(instrumental);
+				wav_play(player);
+				songStart = GetTime();
+				songEnd = 0;
 				sceneIndex = songChosen;
 				break;
 			case 1:
-				StopMusicStream(titleTrack);
+				songName = "Stress";
+				wav_stop(titleTrack);
 				loadStart = GetTime();
 				Unload_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG);
 				Stress(&playerArrows, &computerArrows, &instrumental, &player, &playerRec, &enemyRec, &camera, difficultySelect);
 				Load_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend, &gameOverRec);
 				loadDuration = GetTime() - loadStart;
-				SeekMusicStream(instrumental, loadDuration);
-				SeekMusicStream(player, loadDuration);
-				PlayMusicStream(instrumental);
-				PlayMusicStream(player);
-				songName = "Stress";
+				SeekWav(&instrumental, songName, false, loadDuration);
+				SeekWav(&player, songName, true, loadDuration);
+				wav_play(instrumental);
+				wav_play(player);
+				songStart = GetTime();
+				songEnd = 0;
 				sceneIndex = songChosen;
 				break;
 			case 2:
+				break;
 			default:
 				break;
 			}
@@ -428,39 +451,37 @@ void UpdateDrawFrame(){
 		EndDrawing();
 		break;
 	case introText:
-		UpdateMusicStream(titleTrack);
 		if(IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, 15)){
 			sceneIndex = promptMenu;
 		}
 		// title
 		BeginDrawing();
-		if(GetMusicTimePlayed(titleTrack) >= 1.5 && GetMusicTimePlayed(titleTrack) < 4.5){
+		if(songEnd >= 3.5 && songEnd < 6.5){
 			DrawTextEx(fnfFont, "ITS ALL IN", {(1280/2 - 100)/2, (720/2 - 30)/2}, 48/2, 1.0f, WHITE);
 		}
 
-		if(GetMusicTimePlayed(titleTrack) >= 2.5 && GetMusicTimePlayed(titleTrack) < 4.5){
+		if(songEnd >= 4.5 && songEnd < 6.5){
 			DrawTextEx(fnfFont, "RAYLIB", {(1280/2 - 100)/2, (720/2 + 18)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(GetMusicTimePlayed(titleTrack) >= 4.5 && GetMusicTimePlayed(titleTrack) < 6.5){
+		if(songEnd >= 6.5 && songEnd < 8.5){
 			ClearBackground(BLACK);
 		}
-		if(GetMusicTimePlayed(titleTrack) >= 7){
+		if(songEnd >= 9.0){
 			DrawTextEx(fnfFont, "FRIDAY", {(1280/2 - 100)/2, (720/2 - 30)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(GetMusicTimePlayed(titleTrack) >= 7.5){
+		if(songEnd >= 9.5){
 			DrawTextEx(fnfFont, "NIGHT", {(1280/2 - 100)/2, (720/2 + 18)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(GetMusicTimePlayed(titleTrack) >= 8.5){
+		if(songEnd >= 10.5){
 			DrawTextEx(fnfFont, "FUNKIN", {(1280/2 - 100)/2, (720/2 + 66)/2}, 48/2, 1.0f, WHITE);
 		}
-		if(GetMusicTimePlayed(titleTrack) >= 9.5){
+		if(songEnd >= 11.5){
 			sceneIndex = promptMenu;
 		}
 		EndDrawing();
 		
 		break;
 	case promptMenu:
-		UpdateMusicStream(titleTrack);
 		framesCounter++;
 		if(framesCounter >= (60 / framesSpeed)){
 			if(passedPrompt){
@@ -494,13 +515,10 @@ void UpdateDrawFrame(){
 				currentFrame2 = 1;
 			}
 		}
-		// keep updating the title track music, seamless transition
 		
 		if(IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, 15)){
 			passedPrompt = true;
-			if(!IsSoundPlaying(confirmMenu)){
-				PlaySound(confirmMenu);
-			}
+			snd_sfx_play(confirmMenu, 255, 128);
 			
 		}
 		BeginDrawing();
@@ -511,7 +529,6 @@ void UpdateDrawFrame(){
 		EndDrawing();		
 	   break;
 	case titleScreen:
-		UpdateMusicStream(titleTrack);
 		// freePlay.height = chosen
 		// freePlay.height/2 = not selected
 		
@@ -575,28 +592,24 @@ void UpdateDrawFrame(){
 			creditsTrans = 255;
 			freePlayTrans = 255;
 			passedPrompt = false;
-			PlaySound(cancelMenu);
+			snd_sfx_play(cancelMenu, 255, 128);
 		}
 		if((IsKeyPressed(KEY_ENTER)|| IsGamepadButtonPressed(0, 15) || IsGamepadButtonPressed(0, 7)) && freePlayRec.y == freePlay.height){
 			goToSongList = true;
-			if(!IsSoundPlaying(confirmMenu)){
-				PlaySound(confirmMenu);
-			}
+			snd_sfx_play(confirmMenu, 255, 128);
 		}else if((IsKeyPressed(KEY_ENTER)|| IsGamepadButtonPressed(0, 15) || IsGamepadButtonPressed(0, 7)) && creditsRec.y == credits.height){
 			goToCredits = true;
-			if(!IsSoundPlaying(confirmMenu)){
-				PlaySound(confirmMenu);
-			}
+			snd_sfx_play(confirmMenu, 255, 128);
 			
 		}
 		if(!goToCredits && !goToSongList && (IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, 1) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) <= -stickSensitivity) && freePlayRec.y == freePlay.height/2){
 			creditsRec.y = credits.height/2;
 			freePlayRec.y = freePlay.height;
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}else if(!goToCredits && !goToSongList && (IsKeyPressed(KEY_DOWN) || IsGamepadButtonPressed(0, 3) || GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) >= stickSensitivity)  && freePlayRec.y == freePlay.height){
 			freePlayRec.y = freePlay.height/2;
 			creditsRec.y = credits.height;
-			PlaySound(scrollMenu);
+			snd_sfx_play(scrollMenu, 255, 128);
 		}
 		BeginDrawing();
 		ClearBackground({3, 20, 40}); // dark blue #032040
@@ -725,8 +738,6 @@ void UpdateDrawFrame(){
 		if(score <= -1){
 			score = 0;
 		}
-		UpdateMusicStream(player);
-		UpdateMusicStream(instrumental);
 		// drawing
 		BeginDrawing();
 		songDraw(songName, &camera, &playerRec, &enemyRec);
@@ -770,10 +781,10 @@ void UpdateDrawFrame(){
 			if(playerArrows.back().side == playerSide){
 				playerRec.y = 450;
 				score -= 10;
-				SetMusicVolume(player, 0);
+				wav_volume(player, 0);
 				isPaused = true;
 				misses++;
-				PlaySound(wrong);
+				snd_sfx_play(wrong, 85, 128);
 				switch((int)playerArrows.back().pos.x){
 					case 800/2:
 						playerRec.x = leftPlayerMissed;
@@ -791,20 +802,22 @@ void UpdateDrawFrame(){
 			}
 			playerArrows.pop_back();
 		}
-		if((GetMusicTimePlayed(instrumental) >= GetMusicTimeLength(instrumental) - 5) || (GetMusicTimePlayed(player) >= GetMusicTimeLength(player) - 5)){
+		if((!wav_is_playing(instrumental) || !wav_is_playing(player)) && songEnd >= 30){
 			misses = 13;
 			playerArrows.clear();
 			computerArrows.clear();
 			songSave(songName, score);
 			songCleanup(songName);
 			score = 0;
-			StopMusicStream(player);
-			StopMusicStream(instrumental);
-			UnloadMusicStream(player);
-			UnloadMusicStream(instrumental);
+			wav_stop(player);
+			wav_stop(instrumental);
+			wav_destroy(player);
+			wav_destroy(instrumental);
 			Unload_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend);
 			Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
-			PlayMusicStream(titleTrack);
+			wav_play(titleTrack);
+			songEnd = 0;
+			TraceLog(LOG_WARNING, "song ended");
 			sceneIndex = songList;
 		}
 		if(GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) >= 1.0f){ //RT to exit
@@ -813,22 +826,22 @@ void UpdateDrawFrame(){
 			playerArrows.clear();
 			computerArrows.clear();
 			songCleanup(songName);
-			StopMusicStream(player);
-			StopMusicStream(instrumental);
-			UnloadMusicStream(player);
-			UnloadMusicStream(instrumental);
+			wav_stop(player);
+			wav_stop(instrumental);
+			wav_destroy(player);
+			wav_destroy(instrumental);
 			Unload_SongChosen(&wrong, &gameOverEnd, &gameOverBGM, &leftArrow, &upArrow, &downArrow, &rightArrow, &holdAssets, &notes, &gameOver_boyfriend);
 			Load_menus(&scrollMenu, &confirmMenu, &cancelMenu, &titleTrack, &gfSpeakerTemp, &freePlay, &credits, &logoAtlas, &titleText, &menuBG, &freePlayRec, &creditsRec, &gfSpeakerRec, &logoRec, &titleTextRec);
-			PlayMusicStream(titleTrack);
+			wav_play(titleTrack);
 			sceneIndex = songList;
 		}
 		if(misses <= -1){
 			misses = 0;
 		}
 		if(misses >= 26){
-			StopMusicStream(player);
-			StopMusicStream(instrumental);
-			PlayMusicStream(gameOverBGM);
+			wav_stop(player);
+			wav_stop(instrumental);
+			wav_play(gameOverBGM);
 			currentFrame = 5;
 			currentFrame2 = 0;
 			sceneIndex = gameOver;
@@ -861,4 +874,5 @@ void UpdateDrawFrame(){
 		}
 		break;
 	}
+	songEnd = GetTime() - songStart;
 }
