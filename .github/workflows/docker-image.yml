@@ -11,7 +11,7 @@ jobs:
       - name: Source KOS env
         run: . /opt/toolchains/dc/kos/environ.sh
       - name: Compile & mkdcdisc (CDI)
-        run: make -j$(nproc)
+        run: cd ${{ github.workspace }} && make -j$(nproc)
       - name: Upload CDI
         uses: actions/upload-artifact@v7.0.1
         with:
