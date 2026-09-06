@@ -3,7 +3,6 @@
 I am working on making this code more *native* to the Dreamcast instead of using cross-platform libraries like `libwav` and `raylib`.
 
 I DO NOT OWN ANY OF THE ASSETS FOUND IN `resources/`
-The GPL license covers only the code, the resources are exempt from the license (because they aren't my assets)
 
 https://github.com/FunkinCrew/funkin.assets/
 
