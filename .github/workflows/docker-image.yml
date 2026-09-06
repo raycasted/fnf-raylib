@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     container: nold360/kallistios-sdk:latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Source KOS env
         run: . /opt/toolchains/dc/kos/environ.sh
       - name: Compile & mkdcdisc (CDI)
-        run: cd ${{ github.workspace }} && make -j$(nproc)
+        run: make -j$(nproc)
       - name: Upload CDI
         uses: actions/upload-artifact@v7.0.1
         with:
