@@ -3,10 +3,11 @@
 I am working on making this code more *native* to the Dreamcast instead of using cross-platform libraries like `libwav` and `raylib`.
 
 I DO NOT OWN ANY OF THE ASSETS FOUND IN `resources/`
+The GPL license covers only the code, the resources are exempt from the license (because they aren't my assets)
 
 https://github.com/FunkinCrew/funkin.assets/
 
-https://remoddedrose.itch.io/fnf-font - TODO: use the actual fnf font in the funkin-assets repo instead...
+https://remoddedrose.itch.io/fnf-font
 
 # Controls
 Honestly, it's very standard controls.
