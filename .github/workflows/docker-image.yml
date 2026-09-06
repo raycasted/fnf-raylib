@@ -4,12 +4,12 @@ on:
   push:
     branches: [ dreamcast ]
 jobs:
-  container-test-job:
+  build:
     runs-on: ubuntu-latest
     container: nold360/kallistios-sdk:latest
     steps:
       - name: Source KOS env
-        run: source /opt/toolchains/dc/kos/environ.sh
+        run: . /opt/toolchains/dc/kos/environ.sh
       - name: Compile & mkdcdisc (CDI)
         run: make -j$(nproc)
       - name: Upload CDI
